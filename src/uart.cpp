@@ -22,7 +22,6 @@ uart::configure(uart_init const& init)
     interrupt_.raw = 0;
     bauddiv_       = 0;
 
-    ctrl_.raw = 0;
     ctrl_.raw = new_ctrl.raw;
     // TODO replace with required clock control
     bauddiv_ = system::clock::instance().system_frequency() / init.baud_rate;
