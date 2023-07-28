@@ -16,7 +16,10 @@ template <typename T>
 concept enumeration = std::is_enum_v<T>;
 
 template <typename T>
-concept register_value = integral<T> || enumeration<T>;
+concept unsigned_value = std::is_unsigned_v<T>;
+
+template <typename T>
+concept register_value = unsigned_value<T> and (integral<T> || enumeration<T>);
 
 }    // namespace armpp::concepts
 
@@ -242,10 +245,10 @@ struct register_data<T, Offset, Size, access_mode::bitwise_logic, Mode> {
     constexpr value_type
     get() const
     {
-        if constexpr (!std::is_same_v<value_type, raw_register>) {
-            return static_cast<value_type>((register_ & mask) >> Offset);
-        } else {
+        if constexpr (std::is_same_v<value_type, raw_register>) {
             return (register_ & mask) >> Offset;
+        } else {
+            return static_cast<value_type>((register_ & mask) >> Offset);
         }
     }
 
@@ -256,10 +259,10 @@ struct register_data<T, Offset, Size, access_mode::bitwise_logic, Mode> {
     void
     set(value_type value)
     {
-        if constexpr (!std::is_same_v<value_type, raw_register>) {
-            register_ |= (static_cast<raw_register>(value) << Offset) & mask;
+        if constexpr (std::is_same_v<value_type, raw_register>) {
+             register_ |= (value << Offset) & mask;
         } else {
-            register_ |= (value << Offset) & mask;
+             register_ |= (static_cast<raw_register>(value) << Offset) & mask;
         }
     }
 
